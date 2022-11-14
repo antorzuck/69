@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup as B
 from my_fake_useragent import UserAgent
 import random
+import mechanicalsoup
+
 
 kw = str(input("Type keyword: "))
 scrape_num = int(input("How many pages you want to scrape? (limit is 10) "))
@@ -87,4 +89,25 @@ if '“' in body:
 if '”' in body:
 	body = body.replace('”', "")
 
-print(body)
+print("captions collected going to post this shit on wp")
+
+
+
+browser = mechanicalsoup.StatefulBrowser()
+browser.open("https://quotesholy.com/wp-login.php")
+browser.select_form('form[id="loginform"]')
+
+browser['log'] = 'Auto'
+browser['pwd'] = 'dNT$B@S#W4uc3ytqeBZ^rTm9'
+browser.submit_selected()
+browser.open('https://quotesholy.com/wp-admin/post-new.php')
+browser.select_form('form[id="post"]')
+browser["post_title"] = kw.title()
+browser["content"] = body
+browser["post_status"] = "draft"
+
+browser.submit_selected()
+print("successfully posted on draft")
+
+
+

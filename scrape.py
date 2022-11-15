@@ -3,11 +3,38 @@ from bs4 import BeautifulSoup as B
 from my_fake_useragent import UserAgent
 import random
 import mechanicalsoup
+from requests.auth import HTTPBasicAuth
+import json
+import sys
+
+
+def create_post(title, content):
+    base_url = "https://quotesholy.com/wp-json/wp/v2/posts"
+
+    headers = {
+    "Accept" : "application/json",
+    "Content-Type" : "application/json"
+}
+
+    auth = HTTPBasicAuth("Auto", "XLO2 F2EM liMY ild4 9B0R jMMd")
+
+    data = json.dumps({                                    "status" : "draft",
+"title" : title,
+"content" : content
+})
+
+    req = requests.post(url=base_url, data=data, headers=headers, auth=auth)
+
 
 
 kw = str(input("Type keyword: "))
 scrape_num = int(input("How many pages you want to scrape? (limit is 10) "))
 
+if kw == "blank":
+    create_post(title=" ", content=" ")
+    print("blank created")
+    sys.exit()
+    
 browser = [
     'chrome',
     'firefox',
@@ -75,10 +102,12 @@ for c,i in enumerate(main_links):
         					if not 'Best' in f:
         						if not 'Message' in f:
         							if not 'Quotes' in f:
+        							if not f in body:
         								body = body + f + '\n'
     if p:
     	for pt in p.find_all('p')[1:]:
-    		body = body + pt.text + '\n'
+    		if not pt.text in body:
+    			body = body + pt.text + '\n'
 
 
 if '"' in body:
@@ -92,22 +121,4 @@ if '”' in body:
 print("captions collected going to post this shit on wp")
 
 
-
-browser = mechanicalsoup.StatefulBrowser()
-browser.open("https://quotesholy.com/wp-login.php")
-browser.select_form('form[id="loginform"]')
-
-browser['log'] = 'Auto'
-browser['pwd'] = 'dNT$B@S#W4uc3ytqeBZ^rTm9'
-browser.submit_selected()
-browser.open('https://quotesholy.com/wp-admin/post-new.php')
-browser.select_form('form[id="post"]')
-browser["post_title"] = kw.title()
-browser["content"] = body
-browser["post_status"] = "draft"
-
-browser.submit_selected()
-print("successfully posted on draft")
-
-
-
+create_post(title=kw, content=body)

@@ -6,9 +6,9 @@ import mechanicalsoup
 from requests.auth import HTTPBasicAuth
 import json
 import sys
+import gen_thumbnail
 
-
-def create_post(title, content):
+def create_post(ttl, content, thumb):
     base_url = "https://quotesholy.com/wp-json/wp/v2/posts"
 
     headers = {
@@ -19,8 +19,9 @@ def create_post(title, content):
     auth = HTTPBasicAuth("Auto", "XLO2 F2EM liMY ild4 9B0R jMMd")
 
     data = json.dumps({                                    "status" : "draft",
-"title" : title,
-"content" : content
+"title" : ttl,
+"content" : content,
+"featured_media" : os.listdir(f'thumbnail/{thumb}')
 })
 
     req = requests.post(url=base_url, data=data, headers=headers, auth=auth)
@@ -28,13 +29,14 @@ def create_post(title, content):
 
 
 kw = str(input("Type keyword: "))
-scrape_num = int(input("How many pages you want to scrape? (limit is 10) "))
+
 
 if kw == "blank":
-    create_post(title=" ", content=" ")
+    create_post(ttl=" ", content=" ")
     print("blank created")
     sys.exit()
-    
+scrape_num = int(input("How many pages you want to scrape? (limit is 10) "))
+  
 browser = [
     'chrome',
     'firefox',
@@ -93,8 +95,9 @@ for c,i in enumerate(main_links):
     	p = sp.find('div', class_='entry-content')
 
     for l in li:
-        if len(l.text) > 20:
+        if len(l.text.strip()) > 20:
         	f = l.text
+       
         	if not 'Caption' in f:
         		if not 'Instagram' in f:
         			if not 'Facebook' in f:
@@ -102,8 +105,8 @@ for c,i in enumerate(main_links):
         					if not 'Best' in f:
         						if not 'Message' in f:
         							if not 'Quotes' in f:
-        							if not f in body:
-        								body = body + f + '\n'
+        								if not f in body:
+        									body = body + f + '\n'
     if p:
     	for pt in p.find_all('p')[1:]:
     		if not pt.text in body:
@@ -121,4 +124,8 @@ if '”' in body:
 print("captions collected going to post this shit on wp")
 
 
-create_post(title=kw, content=body)
+thumb = gen_thumbnail.create_thumb(text=kw.title())
+
+create_post(ttl=kw.title(), content=body, thumb=thumb)
+
+print("posted...")

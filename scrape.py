@@ -39,6 +39,8 @@ if kw == "blank":
     print("blank created")
     sys.exit()
 scrape_num = int(input("How many pages you want to scrape? (limit is 10) "))
+q = str(input("Enter a keyword for thumbnail: "))
+
   
 browser = [
     'chrome',
@@ -125,5 +127,5 @@ if '”' in body:
 	body = body.replace('”', "")
 
 print("captions collected going to post this shit on wp")
-create_post(ttl=kw.title(), content=body, thumb=gen_thumbnail.create_thumb(text=kw.title()))
+create_post(ttl=kw.title(), content=body, thumb=gen_thumbnail.create_thumb(text=q))
 print("posted...")

@@ -1,4 +1,5 @@
 import requests
+
 from bs4 import BeautifulSoup as B
 from my_fake_useragent import UserAgent
 import random
@@ -9,24 +10,25 @@ import sys
 import gen_thumbnail
 
 def create_post(ttl, content, thumb):
+    print(thumb)
     base_url = "https://quotesholy.com/wp-json/wp/v2/posts"
 
     headers = {
     "Accept" : "application/json",
-    "Content-Type" : "application/json"
+    #"Content-Type" : "application/json"
 }
 
     auth = HTTPBasicAuth("Auto", "XLO2 F2EM liMY ild4 9B0R jMMd")
 
-    data = json.dumps({                                    "status" : "draft",
-"title" : ttl,
-"content" : content,
-"featured_media" : os.listdir(f'thumbnail/{thumb}')
-})
-
+    data = {
+        "status" : "draft",
+        "title" : ttl,
+        "content" : content,
+        #"featured_media" : thumb
+        "featured_media" : open(f'thumbnail/{thumb}', 'rb')
+}
     req = requests.post(url=base_url, data=data, headers=headers, auth=auth)
-
-
+    print(req)
 
 kw = str(input("Type keyword: "))
 
@@ -123,9 +125,6 @@ if '”' in body:
 
 print("captions collected going to post this shit on wp")
 
-
-thumb = gen_thumbnail.create_thumb(text=kw.title())
-
-create_post(ttl=kw.title(), content=body, thumb=thumb)
-
+create_post(ttl=kw.title(), content=body, thumb=gen_thumbnail.create_thumb(text=kw.title()))
+#gen_thumbnail.create_thumb(text=kw.title())
 print("posted...")

@@ -10,28 +10,29 @@ import sys
 import gen_thumbnail
 
 def create_post(ttl, content, thumb):
-    print(thumb)
     base_url = "https://quotesholy.com/wp-json/wp/v2/posts"
+    media_url = "https://quotesholy.com/wp-json/wp/v2/media"
 
     headers = {
     "Accept" : "application/json",
-    #"Content-Type" : "application/json"
-}
+    }
 
     auth = HTTPBasicAuth("Auto", "XLO2 F2EM liMY ild4 9B0R jMMd")
+
+    file = {"file" : open(f'thumbnail/{thumb}', 'rb')}
+    res = requests.post(url=media_url, files=file, headers=headers, auth=auth)
+    imgid = json.loads(res.content)['id']
 
     data = {
         "status" : "draft",
         "title" : ttl,
         "content" : content,
-        #"featured_media" : thumb
-        "featured_media" : open(f'thumbnail/{thumb}', 'rb')
+        "featured_media" : imgid
 }
     req = requests.post(url=base_url, data=data, headers=headers, auth=auth)
     print(req)
 
 kw = str(input("Type keyword: "))
-
 
 if kw == "blank":
     create_post(ttl=" ", content=" ")
@@ -124,7 +125,5 @@ if '”' in body:
 	body = body.replace('”', "")
 
 print("captions collected going to post this shit on wp")
-
 create_post(ttl=kw.title(), content=body, thumb=gen_thumbnail.create_thumb(text=kw.title()))
-#gen_thumbnail.create_thumb(text=kw.title())
 print("posted...")
